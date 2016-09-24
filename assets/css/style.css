@@ -1,0 +1,7 @@
+#editor-block , #side-panel, #formatting-panel {
+  border: 1px solid #444444;
+}
+
+#editor-block div{
+  border: 1px solid #888888;
+}
