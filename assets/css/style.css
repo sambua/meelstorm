@@ -1,7 +1,10 @@
-#editor-block , #side-panel, #formatting-panel {
+#editor-block , #side-panel, #formatting-panel, .react-grid-layout
+{
   border: 1px solid #444444;
 }
 
-#editor-block div{
+#editor-block div, .react-grid-item, .has-border{
   border: 1px solid #888888;
+  padding: 5px;
 }
+

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const dTarget = React.createClass({
+const DTarget = React.createClass({
   render: function () {
     let i, target;
     return div({
@@ -17,4 +17,4 @@ const dTarget = React.createClass({
   }
 });
 
-export default dTarget;
+export default DTarget;

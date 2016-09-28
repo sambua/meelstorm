@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 // Responsive Grid Layout
 var PureRenderMixin = require('react/lib/ReactComponentWithPureRenderMixin');
@@ -9,28 +8,92 @@ var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 const EditorBlock = React.createClass({
-  getLayouts: function (){
-    return [
-      {i: 'a', x: 0, y: 0, w:1 , h: 2, static: true},
-      {i: 'b', x: 1, y: 0, w:3, h: 2, minW: 2, maxW: 4},
-      {i: 'c', x: 1, y: 0, w:2, h:1}
-    ];
-  },
-  render: function () {
-    // {lg: layout1, md: layout2, ...}
-    let layouts = this.getLayouts;
-    return (
-      <div id="editor-block" className="col-sm-9 col-xs-12">
-        <p> Main text editor block</p>
-        <ResponsiveReactGridLayout className="layout" layouts={layouts} breakpoints={{lg: 1200, md: 996, sm: 768, xs:480, xxx:0}} cols={{lg:12, md:10, sm: 6, xs: 4, xxs: 2}} >
-          <div key={"1"}>1</div>
-          <div key={"2"}>2</div>
-          <div key={"3"}>3</div>
-        </ResponsiveReactGridLayout >
-      </div>
-    )
-  }
-})
+  mixins: [PureRenderMixin],
 
+  getDefaultProps() {
+    return {
+      className: "layout",
+      cols: {lg:12, md: 9, sm: 6, xs: 12, xxs: 12},
+      rowHeight: 20
+    }
+  },
+
+  getInitialState() {
+    return {
+      items: [0, 1, 2, 3, 4].map(function(i, key, list){
+        return {i: i.toString(), x: i*2, y: 0, w: 2, h:2, add: i === (list.length - 1).toString()};
+      }),
+      newCounter: 0
+    };
+  },
+
+  createElement(el){
+    var removeStyle = {
+      position: 'absolute',
+      right: '2px',
+      top: 0,
+      cursor: 'pointer'
+    };
+    var i = el.add ? '+' : el.i;
+    return (
+      <div key={i} data-grid={el}>
+        { el.add ?
+            <span className='add text' onClick={this.onAddItem} title="You can add an item by clicking here"> Add + </span>
+          : <span className="text">{i}</span>}
+        <span className="remove" style={removeStyle} onClick={this.onRemoveItem.bind(this, i)}>x</span>
+      </div>
+    );
+  },
+
+  onAddItem() {
+    /*eslint no-console: 0*/
+    console.log('adding', 'n' + this.state.newCounter);
+    this.setState({
+      // Add new item. Item must have a unique key!
+      items: this.state.items.concat({
+        i: 'n' + this.state.newCounter,
+        x: this.state.items.lenght * 2 % (this.state.cols || 12),
+        y: Infinity, // puts it at the bottom
+        w: 2, h: 2
+      }),
+      // Increment the counter to ensure key is always unique
+      newCounter: this.state.newCounter + 1
+    });
+  },
+
+  // We're using the cols coming back from this to calculate where to add new items.
+  onBreackpointChange(breakpoint, cols){
+    this.setState({
+      breakpoint: breakpoint,
+      cols: cols
+    });
+  },
+
+  onLayoutChange(layout) {
+    this.props.onLayoutChange(layout);
+    this.setState({layout: layout});
+  },
+
+  onRemoveItem(i){
+    console.log('removing' + i);
+    this.setState({items: _.reject(this.state.items, {i: i})});
+  },
+
+  render(){
+    return (
+      <div>
+        <ResponsiveReactGridLayout /*onLayoutChange={this.onLayoutChange}*/ onBreackpointChange={this.onBreakpointChange}
+          {...this.props}>
+          {_.map(this.state.items, this.createElement)}
+        </ResponsiveReactGridLayout>
+        <button onClick={this.onAddItem}> Add Item </button>
+      </div>
+    );
+  }
+});
 
 export default EditorBlock;
+
+//if (require.main === module) {
+//  require('../test-hook.jsx')(module.exports);
+//}
